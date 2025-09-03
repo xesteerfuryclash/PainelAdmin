@@ -1,0 +1,163 @@
+-- Painel Admin - Xesteer (Com Key)
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+
+-- Pedir Key
+local Key = game:GetService("Players"):GetPlayers()[1] -- exemplo, substituir com InputBox se quiser
+local permission = "Free" -- padrão
+
+-- Função para checar Key
+local function CheckKey(input)
+    if input == "xesteer5651!#" then
+        return "Owner"
+    elseif input == "Staffv2br!#" then
+        return "Staff"
+    elseif input == "Free12354" then
+        return "Free"
+    else
+        return "Invalid"
+    end
+end
+
+-- Para demo, pedir via Prompt
+local keyInput = "Staffv2br!#" -- substituir por input real em TextBox/Prompt
+permission = CheckKey(keyInput)
+if permission == "Invalid" then
+    warn("Key Inválida!")
+    return
+end
+
+-- Criar GUI
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Parent = game.CoreGui
+
+local Frame = Instance.new("Frame")
+Frame.Parent = ScreenGui
+Frame.Size = UDim2.new(0,220,0,400)
+Frame.Position = UDim2.new(0.05,0,0.3,0)
+Frame.BackgroundColor3 = Color3.fromRGB(0,0,0)
+Frame.BackgroundTransparency = 0.2
+Frame.Active = true
+Frame.Draggable = true
+Instance.new("UICorner", Frame).CornerRadius = UDim.new(0,15)
+
+-- Título
+local Titulo = Instance.new("TextLabel")
+Titulo.Parent = Frame
+Titulo.Size = UDim2.new(1,-40,0,40)
+Titulo.Position = UDim2.new(0,5,0,0)
+Titulo.BackgroundTransparency = 1
+Titulo.Text = "Painel Admin - Xesteer ⚡"
+Titulo.TextColor3 = Color3.fromRGB(255,255,255)
+Titulo.TextScaled = true
+Titulo.Font = Enum.Font.SourceSansBold
+Titulo.TextXAlignment = Enum.TextXAlignment.Left
+
+-- Fechar e Minimizar (com contorno branco)
+local function CreateButton(parent,text,posX,color)
+    local Btn = Instance.new("TextButton")
+    Btn.Parent = parent
+    Btn.Size = UDim2.new(0,30,0,30)
+    Btn.Position = posX
+    Btn.Text = text
+    Btn.BackgroundColor3 = Color3.fromRGB(40,40,40)
+    Btn.TextColor3 = color
+    Btn.Font = Enum.Font.SourceSansBold
+    Btn.TextScaled = true
+    local border = Instance.new("UIStroke", Btn)
+    border.Color = Color3.fromRGB(255,255,255)
+    border.Thickness = 2
+    return Btn
+end
+
+local Fechar = CreateButton(Frame,"X",UDim2.new(1,-35,0,5),Color3.fromRGB(255,50,50))
+Fechar.MouseButton1Click:Connect(function() ScreenGui:Destroy() end)
+local Minimizar = CreateButton(Frame,"-",UDim2.new(1,-70,0,5),Color3.fromRGB(255,255,0))
+local minimizado = false
+Minimizar.MouseButton1Click:Connect(function()
+    minimizado = not minimizado
+    Frame.Visible = not minimizado
+end)
+
+-- Logo
+local LogoBtn = Instance.new("ImageButton")
+LogoBtn.Parent = ScreenGui
+LogoBtn.Size = UDim2.new(0,60,0,60)
+LogoBtn.Position = UDim2.new(0.01,0,0.4,0)
+LogoBtn.BackgroundTransparency = 1
+LogoBtn.Image = "rbxassetid://82527337183757"
+local aberto = true
+LogoBtn.MouseButton1Click:Connect(function()
+    aberto = not aberto
+    Frame.Visible = aberto
+end)
+
+-- Frame de categorias
+local CategoryFrame = Instance.new("Frame")
+CategoryFrame.Parent = Frame
+CategoryFrame.Size = UDim2.new(0,90,1,-50)
+CategoryFrame.Position = UDim2.new(0,5,0,50)
+CategoryFrame.BackgroundTransparency = 1
+local CategoryLayout = Instance.new("UIListLayout", CategoryFrame)
+CategoryLayout.SortOrder = Enum.SortOrder.LayoutOrder
+CategoryLayout.Padding = UDim.new(0,5)
+
+-- Frame de conteúdo
+local ContentFrame = Instance.new("Frame")
+ContentFrame.Parent = Frame
+ContentFrame.Size = UDim2.new(1,-100,1,-60)
+ContentFrame.Position = UDim2.new(0,100,0,50)
+ContentFrame.BackgroundTransparency = 1
+
+-- Função para criar categoria com botões baseados na permissão
+local function CriarCategoria(nome, botoes)
+    local Btn = Instance.new("TextButton")
+    Btn.Parent = CategoryFrame
+    Btn.Size = UDim2.new(1,0,0,35)
+    Btn.BackgroundColor3 = Color3.fromRGB(40,40,40)
+    Btn.Text = nome
+    Btn.TextColor3 = Color3.fromRGB(255,255,255)
+    Btn.Font = Enum.Font.SourceSansBold
+    Btn.TextScaled = true
+    Instance.new("UICorner", Btn).CornerRadius = UDim.new(0,8)
+    Instance.new("UIStroke", Btn).Color = Color3.fromRGB(255,255,255)
+    Instance.new("UIStroke", Btn).Thickness = 2
+
+    Btn.MouseButton1Click:Connect(function()
+        for _, child in pairs(ContentFrame:GetChildren()) do
+            child:Destroy()
+        end
+        local layout = Instance.new("UIListLayout", ContentFrame)
+        layout.SortOrder = Enum.SortOrder.LayoutOrder
+        layout.Padding = UDim.new(0,5)
+
+        for _, comando in ipairs(botoes) do
+            local ActionBtn = Instance.new("TextButton")
+            ActionBtn.Parent = ContentFrame
+            ActionBtn.Size = UDim2.new(1,0,0,35)
+            ActionBtn.BackgroundColor3 = Color3.fromRGB(50,50,50)
+            ActionBtn.Text = comando
+            ActionBtn.TextColor3 = Color3.fromRGB(255,255,255)
+            ActionBtn.Font = Enum.Font.SourceSansBold
+            ActionBtn.TextScaled = true
+            Instance.new("UICorner", ActionBtn).CornerRadius = UDim.new(0,6)
+            local border2 = Instance.new("UIStroke", ActionBtn)
+            border2.Color = Color3.fromRGB(255,255,255)
+            border2.Thickness = 2
+
+            -- Função placeholder segura
+            ActionBtn.MouseButton1Click:Connect(function()
+                print("Executando comando:", comando)
+            end)
+        end
+    end)
+end
+
+-- Criar categorias de acordo com permissão
+if permission == "Owner" then
+    CriarCategoria("Admin 🛠️", {"Kick","Ban","Freeze","Teleport","Speed","Fly","Noclip","Fun","Music","Effect"})
+elseif permission == "Staff" then
+    CriarCategoria("Staff 🛡️", {"Kick","Freeze","Teleport","Speed","Fun"})
+elseif permission == "Free" then
+    CriarCategoria("Free 🎮", {"Kick","Freeze"})
+end
