@@ -1,127 +1,238 @@
--- Painel Admin - Xesteer (Com Key)
+-- Painel Admin - Xesteer hub (100% FE, select menu, tela de key, categorias, comandos)
+-- Coloque este script em StarterPlayerScripts
+
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local remote = ReplicatedStorage:WaitForChild("PainelAdminEvent")
 
--- Pedir Key
-local Key = game:GetService("Players"):GetPlayers()[1] -- exemplo, substituir com InputBox se quiser
-local permission = "Free" -- padrão
+local TAGS = {
+    ["xesteer5651!#"] = "Dono",
+    ["Staffv2br!#"] = "Staff",
+    ["Free12354"] = "Free"
+}
+local tag = nil
 
--- Função para checar Key
-local function CheckKey(input)
-    if input == "xesteer5651!#" then
-        return "Owner"
-    elseif input == "Staffv2br!#" then
-        return "Staff"
-    elseif input == "Free12354" then
-        return "Free"
+-- Tela de Key
+local ScreenGuiKey = Instance.new("ScreenGui", game:GetService("CoreGui"))
+ScreenGuiKey.Name = "PainelAdminKey"
+local KeyFrame = Instance.new("Frame", ScreenGuiKey)
+KeyFrame.Size = UDim2.new(0,320,0,180)
+KeyFrame.Position = UDim2.new(0.5,-160,0.35,0)
+KeyFrame.BackgroundColor3 = Color3.fromRGB(33,33,33)
+KeyFrame.BackgroundTransparency = 0.07
+Instance.new("UICorner", KeyFrame).CornerRadius = UDim.new(0,18)
+local TitleLabel = Instance.new("TextLabel", KeyFrame)
+TitleLabel.Size = UDim2.new(1,0,0,48)
+TitleLabel.Position = UDim2.new(0,0,0,10)
+TitleLabel.BackgroundTransparency = 1
+TitleLabel.Text = "Painel Admin - Xesteer hub"
+TitleLabel.TextColor3 = Color3.fromRGB(255,255,255)
+TitleLabel.TextScaled = true
+TitleLabel.Font = Enum.Font.GothamBold
+local KeyInfo = Instance.new("TextLabel", KeyFrame)
+KeyInfo.Size = UDim2.new(1,-40,0,30)
+KeyInfo.Position = UDim2.new(0,20,0,58)
+KeyInfo.BackgroundTransparency = 1
+KeyInfo.Text = "Digite sua key de acesso:"
+KeyInfo.TextColor3 = Color3.fromRGB(200,200,200)
+KeyInfo.TextScaled = true
+KeyInfo.Font = Enum.Font.Gotham
+local KeyBox = Instance.new("TextBox", KeyFrame)
+KeyBox.Size = UDim2.new(1,-40,0,32)
+KeyBox.Position = UDim2.new(0,20,0,92)
+KeyBox.BackgroundColor3 = Color3.fromRGB(45,45,45)
+KeyBox.Text = ""
+KeyBox.PlaceholderText = "Sua key aqui..."
+KeyBox.TextColor3 = Color3.fromRGB(255,255,255)
+KeyBox.Font = Enum.Font.GothamBold
+KeyBox.TextScaled = true
+Instance.new("UICorner", KeyBox).CornerRadius = UDim.new(0,10)
+local ConfirmKey = Instance.new("TextButton", KeyFrame)
+ConfirmKey.Size = UDim2.new(0,120,0,34)
+ConfirmKey.Position = UDim2.new(0.5,-60,0,140)
+ConfirmKey.BackgroundColor3 = Color3.fromRGB(35,145,40)
+ConfirmKey.Text = "Entrar"
+ConfirmKey.TextColor3 = Color3.fromRGB(255,255,255)
+ConfirmKey.Font = Enum.Font.GothamBold
+ConfirmKey.TextScaled = true
+Instance.new("UICorner", ConfirmKey).CornerRadius = UDim.new(0,10)
+
+ConfirmKey.MouseButton1Click:Connect(function()
+    local keyInput = KeyBox.Text
+    if TAGS[keyInput] then
+        tag = TAGS[keyInput]
+        ScreenGuiKey:Destroy()
     else
-        return "Invalid"
+        KeyBox.Text = ""
+        KeyBox.PlaceholderText = "Key inválida!"
+        KeyBox.PlaceholderColor3 = Color3.fromRGB(255,70,70)
     end
+end)
+while not tag do task.wait() end
+
+-- Tag acima do jogador
+local function setPlayerTag(tipo)
+    if not LocalPlayer.Character or not LocalPlayer.Character:FindFirstChild("Head") then return end
+    for _, v in pairs(LocalPlayer.Character:GetChildren()) do
+        if v.Name == "AdminTag" then v:Destroy() end
+    end
+    if tipo == "Free" then return end
+    local Billboard = Instance.new("BillboardGui")
+    Billboard.Name = "AdminTag"
+    Billboard.Parent = LocalPlayer.Character
+    Billboard.Adornee = LocalPlayer.Character.Head
+    Billboard.Size = UDim2.new(0, 180, 0, 38)
+    Billboard.StudsOffset = Vector3.new(0, 2.5, 0)
+    Billboard.AlwaysOnTop = true
+    local TagLabel = Instance.new("TextLabel")
+    TagLabel.Parent = Billboard
+    TagLabel.Size = UDim2.new(1, 0, 1, 0)
+    TagLabel.BackgroundTransparency = 1
+    TagLabel.Text = tipo == "Dono" and "Tag Dono" or "Tag Staff"
+    TagLabel.TextColor3 = tipo == "Dono" and Color3.fromRGB(255, 215, 0) or Color3.fromRGB(0, 255, 255)
+    TagLabel.TextStrokeTransparency = 0.5
+    TagLabel.TextStrokeColor3 = Color3.fromRGB(0,0,0)
+    TagLabel.TextScaled = true
+    TagLabel.Font = Enum.Font.GothamBold
 end
+LocalPlayer.CharacterAdded:Connect(function() setPlayerTag(tag) end)
+if LocalPlayer.Character then setPlayerTag(tag) end
 
--- Para demo, pedir via Prompt
-local keyInput = "Staffv2br!#" -- substituir por input real em TextBox/Prompt
-permission = CheckKey(keyInput)
-if permission == "Invalid" then
-    warn("Key Inválida!")
-    return
-end
+-- Painel principal
+local ScreenGui = Instance.new("ScreenGui", game:GetService("CoreGui"))
+ScreenGui.Name = "PainelAdminXesteerHub"
+local Panel = Instance.new("Frame", ScreenGui)
+Panel.Size = UDim2.new(0, 312, 0, 338)
+Panel.Position = UDim2.new(0.5, -156, 0.13, 0)
+Panel.BackgroundColor3 = Color3.fromRGB(33, 33, 33)
+Panel.BackgroundTransparency = 0.13
+Panel.Active = true
+Panel.Draggable = true
+Instance.new("UICorner", Panel).CornerRadius = UDim.new(0, 18)
 
--- Criar GUI
-local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Parent = game.CoreGui
-
-local Frame = Instance.new("Frame")
-Frame.Parent = ScreenGui
-Frame.Size = UDim2.new(0,220,0,400)
-Frame.Position = UDim2.new(0.05,0,0.3,0)
-Frame.BackgroundColor3 = Color3.fromRGB(0,0,0)
-Frame.BackgroundTransparency = 0.2
-Frame.Active = true
-Frame.Draggable = true
-Instance.new("UICorner", Frame).CornerRadius = UDim.new(0,15)
-
--- Título
-local Titulo = Instance.new("TextLabel")
-Titulo.Parent = Frame
-Titulo.Size = UDim2.new(1,-40,0,40)
-Titulo.Position = UDim2.new(0,5,0,0)
+local Titulo = Instance.new("TextLabel", Panel)
+Titulo.Size = UDim2.new(1, -48, 0, 44)
+Titulo.Position = UDim2.new(0, 20, 0, 4)
 Titulo.BackgroundTransparency = 1
-Titulo.Text = "Painel Admin - Xesteer ⚡"
+Titulo.Text = "Painel Admin - Xesteer hub"
 Titulo.TextColor3 = Color3.fromRGB(255,255,255)
 Titulo.TextScaled = true
-Titulo.Font = Enum.Font.SourceSansBold
+Titulo.Font = Enum.Font.GothamBold
 Titulo.TextXAlignment = Enum.TextXAlignment.Left
 
--- Fechar e Minimizar (com contorno branco)
-local function CreateButton(parent,text,posX,color)
-    local Btn = Instance.new("TextButton")
-    Btn.Parent = parent
-    Btn.Size = UDim2.new(0,30,0,30)
-    Btn.Position = posX
-    Btn.Text = text
-    Btn.BackgroundColor3 = Color3.fromRGB(40,40,40)
-    Btn.TextColor3 = color
-    Btn.Font = Enum.Font.SourceSansBold
-    Btn.TextScaled = true
-    local border = Instance.new("UIStroke", Btn)
-    border.Color = Color3.fromRGB(255,255,255)
-    border.Thickness = 2
-    return Btn
-end
+local TagLabel = Instance.new("TextLabel", Panel)
+TagLabel.Size = UDim2.new(0, 130, 0, 22)
+TagLabel.Position = UDim2.new(0,22,0,33)
+TagLabel.BackgroundTransparency = 1
+TagLabel.Text = tag ~= "Free" and (tag == "Dono" and "Tag Dono" or "Tag Staff") or ""
+TagLabel.TextColor3 = tag == "Dono" and Color3.fromRGB(255,215,0) or (tag == "Staff" and Color3.fromRGB(0,255,255) or Color3.fromRGB(0,0,0))
+TagLabel.TextScaled = true
+TagLabel.Font = Enum.Font.GothamBold
+TagLabel.TextXAlignment = Enum.TextXAlignment.Left
 
-local Fechar = CreateButton(Frame,"X",UDim2.new(1,-35,0,5),Color3.fromRGB(255,50,50))
+local TagIcon = Instance.new("ImageLabel", Panel)
+TagIcon.Size = UDim2.new(0, 34, 0, 34)
+TagIcon.Position = UDim2.new(1, -42, 0, 8)
+TagIcon.BackgroundTransparency = 1
+TagIcon.Image = "rbxassetid://11137439813" -- Ícone admin (troque se quiser)
+
+local Fechar = Instance.new("TextButton", Panel)
+Fechar.Size = UDim2.new(0, 28, 0, 28)
+Fechar.Position = UDim2.new(1, -34, 0, 8)
+Fechar.BackgroundColor3 = Color3.fromRGB(40,40,40)
+Fechar.Text = "X"
+Fechar.TextColor3 = Color3.fromRGB(255,50,50)
+Fechar.Font = Enum.Font.GothamBold
+Fechar.TextScaled = true
+local border = Instance.new("UIStroke", Fechar)
+border.Color = Color3.fromRGB(255,255,255)
+border.Thickness = 2
 Fechar.MouseButton1Click:Connect(function() ScreenGui:Destroy() end)
-local Minimizar = CreateButton(Frame,"-",UDim2.new(1,-70,0,5),Color3.fromRGB(255,255,0))
-local minimizado = false
-Minimizar.MouseButton1Click:Connect(function()
-    minimizado = not minimizado
-    Frame.Visible = not minimizado
-end)
 
--- Logo
-local LogoBtn = Instance.new("ImageButton")
-LogoBtn.Parent = ScreenGui
-LogoBtn.Size = UDim2.new(0,60,0,60)
-LogoBtn.Position = UDim2.new(0.01,0,0.4,0)
-LogoBtn.BackgroundTransparency = 1
-LogoBtn.Image = "rbxassetid://82527337183757"
-local aberto = true
-LogoBtn.MouseButton1Click:Connect(function()
-    aberto = not aberto
-    Frame.Visible = aberto
-end)
+-- Select Player (menu no topo)
+local PlayerDropdown = Instance.new("Frame", Panel)
+PlayerDropdown.Position = UDim2.new(0, 18, 0, 62)
+PlayerDropdown.Size = UDim2.new(0, 270, 0, 28)
+PlayerDropdown.BackgroundColor3 = Color3.fromRGB(40,40,40)
+PlayerDropdown.BorderSizePixel = 0
+Instance.new("UICorner", PlayerDropdown).CornerRadius = UDim.new(0,10)
 
--- Frame de categorias
-local CategoryFrame = Instance.new("Frame")
-CategoryFrame.Parent = Frame
-CategoryFrame.Size = UDim2.new(0,90,1,-50)
-CategoryFrame.Position = UDim2.new(0,5,0,50)
+local SelectedPlayer = Instance.new("TextButton", PlayerDropdown)
+SelectedPlayer.Size = UDim2.new(1, 0, 1, 0)
+SelectedPlayer.BackgroundTransparency = 1
+SelectedPlayer.Text = "Escolha um player"
+SelectedPlayer.TextColor3 = Color3.fromRGB(255,255,255)
+SelectedPlayer.Font = Enum.Font.GothamBold
+SelectedPlayer.TextScaled = true
+
+local DropdownList = Instance.new("Frame", PlayerDropdown)
+DropdownList.Position = UDim2.new(0, 0, 1, 0)
+DropdownList.Size = UDim2.new(1, 0, 0, 0)
+DropdownList.BackgroundColor3 = Color3.fromRGB(35,35,35)
+DropdownList.Visible = false
+DropdownList.ZIndex = 10
+Instance.new("UICorner", DropdownList).CornerRadius = UDim.new(0,10)
+local dropdownLayout = Instance.new("UIListLayout", DropdownList)
+dropdownLayout.SortOrder = Enum.SortOrder.LayoutOrder
+
+local function updateDropdown()
+    for _, child in ipairs(DropdownList:GetChildren()) do
+        if child:IsA("TextButton") then child:Destroy() end
+    end
+    for _, player in ipairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer then
+            local option = Instance.new("TextButton", DropdownList)
+            option.Size = UDim2.new(1, 0, 0, 28)
+            option.BackgroundTransparency = 1
+            option.Text = player.DisplayName.." ("..player.Name..")"
+            option.TextColor3 = Color3.fromRGB(200,200,255)
+            option.Font = Enum.Font.GothamBold
+            option.TextScaled = true
+            option.MouseButton1Click:Connect(function()
+                SelectedPlayer.Text = option.Text
+                DropdownList.Visible = false
+                DropdownList.Size = UDim2.new(1, 0, 0, 0)
+                SelectedPlayer:SetAttribute("Selected", player.Name)
+            end)
+        end
+    end
+    DropdownList.Size = UDim2.new(1, 0, 0, #DropdownList:GetChildren() * 28)
+end
+SelectedPlayer.MouseButton1Click:Connect(function()
+    DropdownList.Visible = not DropdownList.Visible
+    if DropdownList.Visible then updateDropdown() end
+end)
+Players.PlayerAdded:Connect(updateDropdown)
+Players.PlayerRemoving:Connect(updateDropdown)
+updateDropdown()
+
+-- Categorias (Informações + Admin)
+local CategoryFrame = Instance.new("Frame", Panel)
+CategoryFrame.Position = UDim2.new(0,18,0,98)
+CategoryFrame.Size = UDim2.new(0,108,1,-110)
 CategoryFrame.BackgroundTransparency = 1
 local CategoryLayout = Instance.new("UIListLayout", CategoryFrame)
 CategoryLayout.SortOrder = Enum.SortOrder.LayoutOrder
-CategoryLayout.Padding = UDim.new(0,5)
+CategoryLayout.Padding = UDim.new(0,8)
 
--- Frame de conteúdo
-local ContentFrame = Instance.new("Frame")
-ContentFrame.Parent = Frame
-ContentFrame.Size = UDim2.new(1,-100,1,-60)
-ContentFrame.Position = UDim2.new(0,100,0,50)
+local ContentFrame = Instance.new("Frame", Panel)
+ContentFrame.Position = UDim2.new(0,134,0,98)
+ContentFrame.Size = UDim2.new(1,-152,1,-110)
 ContentFrame.BackgroundTransparency = 1
 
--- Função para criar categoria com botões baseados na permissão
 local function CriarCategoria(nome, botoes)
-    local Btn = Instance.new("TextButton")
-    Btn.Parent = CategoryFrame
-    Btn.Size = UDim2.new(1,0,0,35)
-    Btn.BackgroundColor3 = Color3.fromRGB(40,40,40)
+    local Btn = Instance.new("TextButton", CategoryFrame)
+    Btn.Size = UDim2.new(1,0,0,36)
+    Btn.BackgroundColor3 = Color3.fromRGB(50,50,50)
     Btn.Text = nome
     Btn.TextColor3 = Color3.fromRGB(255,255,255)
-    Btn.Font = Enum.Font.SourceSansBold
+    Btn.Font = Enum.Font.GothamBold
     Btn.TextScaled = true
-    Instance.new("UICorner", Btn).CornerRadius = UDim.new(0,8)
-    Instance.new("UIStroke", Btn).Color = Color3.fromRGB(255,255,255)
-    Instance.new("UIStroke", Btn).Thickness = 2
+    Instance.new("UICorner", Btn).CornerRadius = UDim.new(0,10)
+    local border2 = Instance.new("UIStroke", Btn)
+    border2.Color = Color3.fromRGB(255,255,255)
+    border2.Thickness = 2
 
     Btn.MouseButton1Click:Connect(function()
         for _, child in pairs(ContentFrame:GetChildren()) do
@@ -129,35 +240,38 @@ local function CriarCategoria(nome, botoes)
         end
         local layout = Instance.new("UIListLayout", ContentFrame)
         layout.SortOrder = Enum.SortOrder.LayoutOrder
-        layout.Padding = UDim.new(0,5)
+        layout.Padding = UDim.new(0,8)
 
         for _, comando in ipairs(botoes) do
-            local ActionBtn = Instance.new("TextButton")
-            ActionBtn.Parent = ContentFrame
-            ActionBtn.Size = UDim2.new(1,0,0,35)
-            ActionBtn.BackgroundColor3 = Color3.fromRGB(50,50,50)
+            local ActionBtn = Instance.new("TextButton", ContentFrame)
+            ActionBtn.Size = UDim2.new(1,0,0,36)
+            ActionBtn.BackgroundColor3 = Color3.fromRGB(60,60,60)
             ActionBtn.Text = comando
             ActionBtn.TextColor3 = Color3.fromRGB(255,255,255)
-            ActionBtn.Font = Enum.Font.SourceSansBold
+            ActionBtn.Font = Enum.Font.GothamBold
             ActionBtn.TextScaled = true
-            Instance.new("UICorner", ActionBtn).CornerRadius = UDim.new(0,6)
-            local border2 = Instance.new("UIStroke", ActionBtn)
-            border2.Color = Color3.fromRGB(255,255,255)
-            border2.Thickness = 2
+            Instance.new("UICorner", ActionBtn).CornerRadius = UDim.new(0,8)
+            local border3 = Instance.new("UIStroke", ActionBtn)
+            border3.Color = Color3.fromRGB(255,255,255)
+            border3.Thickness = 2
 
-            -- Função placeholder segura
+            -- 100% FE: comando via RemoteEvent para o servidor
             ActionBtn.MouseButton1Click:Connect(function()
-                print("Executando comando:", comando)
+                local selectedName = SelectedPlayer:GetAttribute("Selected")
+                if not selectedName then
+                    ActionBtn.Text = "Selecione um Player!"
+                    task.wait(1)
+                    ActionBtn.Text = comando
+                    return
+                end
+                remote:FireServer(comando, selectedName)
+                ActionBtn.Text = "Executado!"
+                task.wait(1)
+                ActionBtn.Text = comando
             end)
         end
     end)
 end
 
--- Criar categorias de acordo com permissão
-if permission == "Owner" then
-    CriarCategoria("Admin 🛠️", {"Kick","Ban","Freeze","Teleport","Speed","Fly","Noclip","Fun","Music","Effect"})
-elseif permission == "Staff" then
-    CriarCategoria("Staff 🛡️", {"Kick","Freeze","Teleport","Speed","Fun"})
-elseif permission == "Free" then
-    CriarCategoria("Free 🎮", {"Kick","Freeze"})
-end
+CriarCategoria("Informações", {"Em desenvolvimento"})
+CriarCategoria("Admin", {"Ban", "Kick", "Jail", "Freeze", "Crash", "Fling", "Bring", "Teleport"})
